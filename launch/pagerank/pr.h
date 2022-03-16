@@ -14,7 +14,7 @@
 float alpha = 0.85;
 float epsilon = 0.01;
 
-void init_kernel(csr_graph G, unsigned long num_nodes, float **x, float **in_r, unsigned long *in_index, unsigned long *out_index, unsigned long **in_wl, unsigned long **out_wl, float **ret) {
+void init_kernel(unsigned long num_nodes, float **x, float **in_r, unsigned long *in_index, unsigned long *out_index, unsigned long **in_wl, unsigned long **out_wl, float **ret) {
   *x = (float *) malloc(sizeof(float) * num_nodes);
   *in_r = (float *) malloc(sizeof(float) * num_nodes);
   *in_wl = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes);
@@ -28,7 +28,9 @@ void init_kernel(csr_graph G, unsigned long num_nodes, float **x, float **in_r, 
   
   *in_index = 0;
   *out_index = 0;
-  
+}
+ 
+void init_kernel_vals(csr_graph G, float **in_r, unsigned long *in_index, unsigned long **in_wl) { 
   for (unsigned long v = 0; v < G.nodes; v++) {
     unsigned long G_v = G.node_array[v+1]-G.node_array[v];
     for (unsigned long i = G.node_array[v]; i < G.node_array[v+1]; i++) {

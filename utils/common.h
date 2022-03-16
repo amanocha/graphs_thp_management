@@ -9,7 +9,7 @@
 #include <dirent.h>
 #include <sys/resource.h>
 
-#define MAX_EDGES 4094967295
+#define MAX_EDGES 1
 #define weight_max 1073741823
 
 using namespace std;

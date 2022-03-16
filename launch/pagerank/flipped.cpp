@@ -187,10 +187,10 @@ void launch_app(string graph_fname, int run_kernel) {
   struct rusage usage1, usage2;
 
   // Initialize data and create irregular data
-  G = parse_bin_files(graph_fname, run_kernel, 1);
-
   create_irreg_data(run_kernel, &ret);
   init_kernel(num_nodes, &x, &in_r, &in_index, &out_index, &in_wl, &out_wl, &ret);
+  
+  G = parse_bin_files(graph_fname, run_kernel, 1);
   init_kernel_vals(G, &in_r, &in_index, &in_wl);
 
   *node_addr = G.node_array;

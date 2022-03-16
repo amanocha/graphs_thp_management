@@ -1,6 +1,10 @@
 **/.DS_Store
 numactl/
-**/utils/dbg.txt
+utils/graph_conversion/
+
+**/dbg.txt
+**/dbg
+
 **/main
 **/app_output_*
 **/err_output_*
@@ -8,3 +12,5 @@ numactl/
 **/pf_output_*
 **/stat*
 **/thp_output_*
+
+**/*.un~

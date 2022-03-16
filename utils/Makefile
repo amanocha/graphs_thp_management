@@ -1,12 +1,19 @@
+C=gcc
+CFLAGS=-lm
 CXX=g++
 CXXFLAGS=-std=c++11
 
-TARGETS= dbg
+C_TARGETS= fragm free
+CXX_TARGETS= dbg
 
-all: $(TARGETS)
+all: $(C_TARGETS) $(CXX_TARGETS)
 
-$(TARGETS):
+$(C_TARGETS):
+	$(C) $(CFLAGS) -o $@ $@.c
+
+$(CXX_TARGETS):
 	$(CXX) $(CXXFLAGS) -o $@ $@.cpp
 
 clean:
-	rm $(TARGETS)
+	rm $(C_TARGETS)
+	rm $(CXX_TARGETS)

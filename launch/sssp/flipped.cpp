@@ -16,9 +16,9 @@
 #include <errno.h>
 #include <vector>
 
-#include "pr.h"
+#include "sssp.h"
 
-#define MAX_BUFFER_SIZE 2000
+#define MAX_BUFFER_SIZE 1000
 #define APP_TIME 1000000
 #define SLEEP_TIME 1000000
 #define KB_SIZE 1024
@@ -30,25 +30,24 @@ extern int errno;
 
 const char* done_filename = "done.txt";
 string smaps_filename, stat_filename;
-int pid, pidfd, policy;
+int pid, pidfd;
 unsigned long num_nodes, num_edges, num_thp_nodes, total_num_thps;
-unsigned long **node_addr, **edge_addr;
-float  **ret_addr;
+unsigned long **node_addr, **edge_addr, **ret_addr;
 
 struct iovec iov;
 float threshold;
 
 // Set up irregularly accessed data
-void create_irreg_data(int run_kernel, float **ret) {
+void create_irreg_data(int run_kernel, unsigned long** ret) {
   void *tmp = nullptr;
   posix_memalign(&tmp, 1 << 21, num_nodes * sizeof(unsigned long));
-  *ret = static_cast<float*>(tmp);
+  *ret = static_cast<unsigned long*>(tmp);
   
   if (run_kernel >= 1 && run_kernel <= 20) {
       num_thp_nodes = (unsigned long) num_nodes*run_kernel*PERCENT_INTERVAL;
       cout << "Applying THPs to " << num_thp_nodes << "/" << num_nodes << endl;
       
-      int err = madvise(*ret, num_nodes * sizeof(float), MADV_HUGEPAGE);
+      int err = madvise(*ret, num_nodes * sizeof(unsigned long), MADV_HUGEPAGE);
       if (err != 0) perror("Error!");
       else cout << "MADV_HUGEPAGE ret successful!" << endl;
     } else if (run_kernel == 100) {
@@ -59,7 +58,7 @@ void create_irreg_data(int run_kernel, float **ret) {
       else cout << "MADV_HUGEPAGE ret successful!" << endl;
 
       /*
-      int err = lock_memory((char*) ret, num_nodes * sizeof(float));
+      int err = lock_memory((char*) ret, num_nodes * sizeof(unsigned long));
       if (err != 0) perror("Error!");
       */
     } else {
@@ -113,7 +112,7 @@ void launch_thp_tracking(int cpid, int run_kernel, const char* thp_filename, con
   unsigned int idx = 0;
   long thp_diff, num_thps_promote;
   vector<tuple<double, unsigned long, unsigned long>> thps_over_time, page_faults_over_time; 
-  float *ret = *ret_addr;
+  unsigned long *ret = *ret_addr;
   int soft_pf1, hard_pf1, soft_pf2, hard_pf2, soft_pf, hard_pf;
 
   setup_pagemaps(pid);
@@ -177,21 +176,19 @@ void launch_thp_tracking(int cpid, int run_kernel, const char* thp_filename, con
   return; 
 }
 
-void launch_app(string graph_fname, int run_kernel) {
+void launch_app(string graph_fname, int run_kernel, unsigned long start_seed) {
   csr_graph G;
-  unsigned long in_index, out_index, *in_wl, *out_wl;
-  float *x, *in_r, *ret;
+  unsigned long *ret, in_index, out_index, *in_wl, *out_wl;
   double user_time1, kernel_time1, user_time2, kernel_time2;
   chrono::time_point<chrono::system_clock> start, end;
   int rusage_out = 0;
   struct rusage usage1, usage2;
 
   // Initialize data and create irregular data
-  G = parse_bin_files(graph_fname, run_kernel, 1);
-
   create_irreg_data(run_kernel, &ret);
-  init_kernel(num_nodes, &x, &in_r, &in_index, &out_index, &in_wl, &out_wl, &ret);
-  init_kernel_vals(G, &in_r, &in_index, &in_wl);
+  init_kernel(num_nodes, start_seed, &in_index, &out_index, &in_wl, &out_wl, ret);
+
+  G = parse_bin_files(graph_fname, run_kernel, 0);
 
   *node_addr = G.node_array;
   *edge_addr = G.edge_array;
@@ -213,7 +210,7 @@ void launch_app(string graph_fname, int run_kernel) {
   printf("\n\nstarting kernel\n");
   start = chrono::system_clock::now();
   get_times(stat_filename.c_str(), &user_time1, &kernel_time1);
-  kernel(G, x, in_r, ret, in_wl, &in_index, out_wl, &out_index,0 , 1); // part of program to perf stat
+  kernel(G, ret, in_wl, &in_index, out_wl, &out_index, 0 , 1); // part of program to perf stat
   get_times(stat_filename.c_str(), &user_time2, &kernel_time2);
   end = std::chrono::system_clock::now();
   printf("ending kernel\n");
@@ -248,17 +245,18 @@ int main(int argc, char** argv) {
   string graph_fname;
   int run_kernel = 0;
   const char *perf_cmd, *thp_filename = "thp.txt", *pf_filename = "pf.txt", *size_filename = "num_nodes_edges.txt";
-  unsigned long max_demotion_scans = ULLONG_MAX;
+  unsigned long start_seed = 0, max_demotion_scans = ULLONG_MAX;
   struct bitmask *parent_mask = NULL;
 
   assert(argc >= 2);
   graph_fname = argv[1];
   if (argc >= 3) run_kernel = atoi(argv[2]);
-  if (argc >= 4) perf_cmd = argv[3];
+  if (argc >= 4) start_seed = atoi(argv[3]);
+  if (argc >= 5) perf_cmd = argv[4];
   else perf_cmd = "perf stat -p %d -B -v -e dTLB-load-misses,dTLB-loads -o stat.log";
-  if (argc >= 5) thp_filename = argv[4];
-  if (argc >= 6) pf_filename = argv[5];
-  if (argc >= 7) max_demotion_scans = atoi(argv[6]);
+  if (argc >= 6) thp_filename = argv[5];
+  if (argc >= 7) pf_filename = argv[6];
+  if (argc >= 8) max_demotion_scans = atoi(argv[7]);
 
   parent_mask = numa_allocate_nodemask();
   if (!parent_mask) numa_error((char*) "numa_allocate_nodemask");
@@ -283,7 +281,7 @@ int main(int argc, char** argv) {
 
       node_addr = (unsigned long**) mmap(NULL, sizeof(unsigned long*), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
       edge_addr = (unsigned long**) mmap(NULL, sizeof(unsigned long*), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-      ret_addr = (float**) mmap(NULL, sizeof(float*), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
+      ret_addr = (unsigned long**) mmap(NULL, sizeof(unsigned long*), PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
       ifstream nodes_edges_file(graph_fname + size_filename);
       nodes_edges_file >> num_nodes;
       nodes_edges_file >> num_edges;
@@ -299,7 +297,7 @@ int main(int argc, char** argv) {
         setpgid(cpid2, 0); // set the child the leader of its process group
 
         // Run app process
-        launch_app(graph_fname, run_kernel);
+        launch_app(graph_fname, run_kernel, start_seed);
 
         // kill child processes and all their descendants, e.g. sh, perf stat, etc.
         kill(-cpid, SIGINT); // stop perf stat 
