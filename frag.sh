@@ -3,12 +3,16 @@
 DATASET=$1
 APP=$2
 NUMA_NODE=$3
+EXP_NUM=$4
 
-EXP_NUM=4
 ORDER=9
 FILE="done.txt"
 
 levels=(0 25 50 75)
+
+if [ $EXP_NUM == 5 ] ;  then
+	levels=(50)
+fi
 
 re1='^[0-9]+\.00$' # 0.00 (integer) regex
 re2='^[0-9]+\.50$' # 0.5 regex
@@ -44,15 +48,15 @@ do
 	
 	cmd="numactl --membind $NUMA_NODE ./utils/fragm fragment $NUMA_NODE $ORDER $frag_level"
 	echo $cmd
-	screen -dm -S frag $cmd
+	#screen -dm -S frag $cmd
 	
 	pid=$(screen -ls | awk '/\.frag\t/ {print strtonum($1)}')
 
 	echo "Waiting for fragmentation to finish..."
-	while [ ! -f "$FILE" ] 
-	do
-		sleep 1
-	done
+	#while [ ! -f "$FILE" ] 
+	#do
+	#	sleep 1
+	#done
 	
 	echo "Done!"
 
@@ -79,7 +83,7 @@ do
 
 	cmd="./utils/free $FILE $ORDER $NUMA_NODE"
 	echo $cmd
-	$cmd
+	#$cmd
 
 	echo ""
 

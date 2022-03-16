@@ -55,6 +55,7 @@ void kernel(csr_graph G, unsigned long *ret, unsigned long *in_wl, unsigned long
     hop++;
     *in_index = *out_index;
     *out_index = 0;
+      
   }
 }
 

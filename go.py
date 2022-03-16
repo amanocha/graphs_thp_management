@@ -5,8 +5,9 @@ import sys
 
 from subprocess import Popen, PIPE
 
-GRAPH_DIR = "data/"
-RESULT_DIR = "results/"
+HOME = "/home/aninda/vldb/" # ADD DIRECTORY PATH HERE
+GRAPH_DIR = HOME + "data/"
+RESULT_DIR = HOME + "results/"
 
 # APPS
 apps = ["bfs", "sssp", "pagerank"]
@@ -67,7 +68,7 @@ def setup_run(madvise, exp_type, flipped=False):
       output = app + "_" + names[len(names)-2] + "/"
       if not os.path.isdir(exp_dir + output):
         tmp_output = exp_dir + "tmp_" + output
-        data = GRAPH_DIR + "vp/" + input
+        data = GRAPH_DIR + input
         cmd_args = ["time python3 measure.py", "-s", source, "-d", data, "-o", tmp_output, "-ma", str(madvise), "-x", str(NUM_ITER)]
         if "bfs" in app or "sssp" in app:
           cmd_args += ["-ss", start_seed[input]]
@@ -87,7 +88,9 @@ def run_tlb_char():
  
 # Experiment 2: Data Structure Analysis
 def run_data_struct():
-  for madvise in range(0, 500, 100):
+  default = "thp" if is_thp == 1 else "none"
+  end = 400 if is_thp == 0 else 1
+  for madvise in range(0, end, 100):
     exp_type = "data_struct/"
     if madvise == 100:
       exp_type += "prop_array"
@@ -98,7 +101,7 @@ def run_data_struct():
     elif madvise == 400:
       exp_type += "values_array"
     else:
-      exp_type += "none"
+      exp_type += default
     setup_run(madvise, exp_type)
 
 #Experiment 3: Constrained Memory
@@ -106,13 +109,15 @@ def run_constrained_mem():
   for f in range(2):
     exp_type = "constrained_mem/"
     if args.config:
-      exp_type += args.config + "/"
+      exp_type += args.config + "/" 
     if is_thp == 1:
       exp_type += "thp"
     elif is_thp == 2:
       exp_type += "thp_no_defrag"
     else:
       exp_type += "none"
+    if f == 1:
+      exp_type += "_flipped"
     setup_run(0, exp_type, f)
 
 #Experiment 4: Fragmented Memory
@@ -127,13 +132,20 @@ def run_frag_mem():
       exp_type += "thp_no_defrag"
     else:
       exp_type += "none"
+    if f == 1:
+      exp_type += "_flipped"
     setup_run(0, exp_type, f)
 
 #Experiment 5: Selective THP
 def run_select_thp():
-  exp_type = "select_thp/"
-  for madvise in range(0, 21, 2):
-    exp_type += "thp_" + str(madvise*5)
+  default = "thp" if is_thp == 1 else "none"
+  end = 21 if is_thp == 0 else 1
+  for madvise in range(0, end, 2):
+    exp_type = "select_thp/"
+    if madvise == 0:
+      exp_type += default
+    else:
+      exp_type += "thp_" + str(madvise*5)
     setup_run(madvise, exp_type)
 
 # EXPERIMENTS
@@ -178,6 +190,8 @@ def main():
     
   for dataset in datasets:
     vp_inputs += [dataset + "/"]
+    if args.experiment == 5:
+      vp_inputs += ["DBG_" + dataset + "/"]
 
   # Experiments 
   if args.experiment != -1:
@@ -190,6 +204,9 @@ def main():
     run_data_struct()
     run_constrained_mem()
     run_frag_mem()
+  
+    for dataset in datasets:
+      vp_inputs += ["DBG_" + dataset + "/"]
     run_select_thp()
 
 if __name__ == "__main__":

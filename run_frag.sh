@@ -1,7 +1,8 @@
 #!/bin/bash
 
+EXP_NUM=$1
+
 footprints=(8634 16123 16611 3121 12800 24374 25386 4736 8952 16555 17589 3252) # MB
-footprints=(8634) # MB
 datasets=(Kronecker_25 Twitter Sd1_Arc Wikipedia)
 
 offset=3072
@@ -34,7 +35,7 @@ do
 
 	d=$(( i % num_datasets ))
 	dataset=${datasets[$d]}
-	cmd="sudo bash frag.sh $dataset $app $NUMA_NODE"
+	cmd="sudo bash frag.sh $dataset $app $NUMA_NODE $EXP_NUM"
 	echo $cmd
 	$cmd
 

@@ -8,6 +8,7 @@ import time
 from go import *
 
 NUMA_NODE = 1 # EDIT THIS VALUE (NUMA NODE)
+FREQ = 2.1e9
 
 # EXPERIMENT INFO
 output = ""
@@ -37,6 +38,7 @@ virtual = [
             "dtlb_store_misses.walk_completed", "dtlb_store_misses.walk_completed_1g", "dtlb_store_misses.walk_completed_2m_4m", "dtlb_store_misses.walk_completed_4k"
           ]
 metrics = general + l1cache + llc + virtual
+metric_vals = {}
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -80,7 +82,7 @@ def execute(run_kernel, iteration=""):
         cmd_args += ["-e", metric + ":u"]
     perf_cmd = " ".join(cmd_args) + "\""
     
-    cmd_args = ["numactl -C 0 --membind=" + NUMA_NODE + " sudo ./" + EXEC, input_path, run_kernel]
+    cmd_args = ["numactl -C 0 --membind=" + str(NUMA_NODE) + " sudo ./" + EXEC, input_path, run_kernel]
 
     if start_seed != -1:
         cmd_args += [str(start_seed)]
@@ -188,7 +190,7 @@ def parse_results(run_kernel, iteration=""):
     measurements = open(output + results_file, "w+")
 
     measurements.write("RESULTS:\n")
-    measurements.write("----------\n\n")
+    measurements.write("----------\n")
     measurements.write("\nCACHE:\n")
     measurements.write("L1 Miss Rate: " + str(l1_misses*100.0/l1_refs) + "\n")
     measurements.write("LLC Miss Rate: " + str(llc_misses*100.0/llc_refs) + "\n")
@@ -244,14 +246,14 @@ def main():
         new_dir = os.path.dirname(source)
 
         if args.output:
-          output = args.output
+            output = args.output
         else:
-          output = "results/all/" + app_name + "_" + app_input + "/"
+            output = "results/all/" + app_name + "_" + app_input + "/"
 
         if (not os.path.isdir(output)):
-          mkdirp(output)
+            mkdirp(output)
         
-	os.chdir(new_dir)
+        os.chdir(new_dir)
 
         print("Application: " + app_name)
         print("Application file path: " + source)
@@ -260,7 +262,7 @@ def main():
         print("------------------------------------------------------------\n")
         
 	# Run Experiment
-	start_time = time.time()
+        start_time = time.time()
 
         compile()
         for i in range(num_samples):
@@ -271,7 +273,7 @@ def main():
         parse_results(run_kernel)
         
         end_time = time.time()
-        print("Total Time = " + str(round(start_time - end_time)) + " seconds.\n")
+        print("Total Time = " + str(round(end_time - start_time)) + " seconds.\n")
 
 if __name__ == "__main__":
     main()

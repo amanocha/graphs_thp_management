@@ -9,7 +9,7 @@
 #include <dirent.h>
 #include <sys/resource.h>
 
-#define MAX_EDGES 1
+#define MAX_EDGES 4094967295
 #define weight_max 1073741823
 
 using namespace std;
@@ -70,7 +70,6 @@ int count_directory(const char* dir_name, const char* prefix) {
     int num = 0;
     if (d) {
         while ((dir = readdir(d)) != NULL) {
-            //printf("%s\n", dir->d_name);
             std::string name = dir->d_name;
             if (name.rfind(prefix, 0) == 0) num++;
         }
@@ -96,8 +95,6 @@ csr_graph parse_bin_files(string base, int run_kernel=0, int is_bfs=0) {
   ret.nodes = nodes;
   ret.edges = edges;
   if (run_kernel == 200) {
-    //ret.node_array = (unsigned long *) mmap(NULL, sizeof(unsigned long) * (ret.nodes+1), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
-    //if (ret.node_array == MAP_FAILED) printf("Mapping nodes failed\n");
     posix_memalign(&tmp, 1 << 21, ret.nodes * sizeof(unsigned long));
     int err;
     err = madvise(tmp, ret.nodes * sizeof(unsigned long), MADV_HUGEPAGE);
@@ -163,28 +160,14 @@ csr_graph parse_bin_files(string base, int run_kernel=0, int is_bfs=0) {
 
     posix_memalign(&tmp, 1 << 21, (ret.nodes+1) * sizeof(unsigned long));
     ret.node_array = static_cast<unsigned long*>(tmp);
-    /*
-    err = madvise(ret.node_array, (ret.nodes+1) * sizeof(unsigned long), MADV_HUGEPAGE);
-    if (err != 0) perror("Error!");
-    */
 
     posix_memalign(&tmp, 1 << 21, ret.edges * sizeof(unsigned long));
     ret.edge_array = static_cast<unsigned long*>(tmp);
-    /*
-    err = madvise(ret.edge_array, ret.edges * sizeof(unsigned long), MADV_HUGEPAGE);
-    if (err != 0) perror("Error!");
-    err = lock_memory((char*) tmp, ret.edges * sizeof(unsigned long));
-    if (err != 0) perror("Error!");
-    */
     
     if (is_bfs == 0) {
       posix_memalign(&tmp, 1 << 21, ret.edges * sizeof(unsigned long));
       ret.edge_values = static_cast<weightT*>(tmp);
     }
-    /*
-    err = madvise(ret.edge_values, ret.edges * sizeof(unsigned long), MADV_HUGEPAGE);
-    if (err != 0) perror("Error!");
-    */
   }
 
   // ***** NODE ARRAY *****

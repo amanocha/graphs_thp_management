@@ -1,6 +1,8 @@
 **/.DS_Store
-numactl/
-utils/graph_conversion/
+__pycache__
+
+data/
+numactl/.o
 
 **/dbg.txt
 **/dbg
