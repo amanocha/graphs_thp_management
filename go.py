@@ -37,7 +37,6 @@ def parse_args():
 
 def run(cmd, tmp_output, output):
   print(cmd)
-  return
   exit = os.system(cmd)
   if not exit:
     if tmp_output != output:
@@ -130,7 +129,7 @@ def run_frag_mem():
       exp_type += "none"
     setup_run(0, exp_type, f)
 
-#Experiment : Selective THP Sensitivity
+#Experiment 5: Selective THP
 def run_select_thp():
   exp_type = "select_thp/"
   for madvise in range(0, 21, 2):
@@ -142,7 +141,8 @@ experiments = {
                 1: run_tlb_char,
                 2: run_data_struct,
 		3: run_constrained_mem,
-		4: run_frag_mem
+		4: run_frag_mem,
+		5: run_select_thp
               }
 
 def main():
@@ -189,6 +189,7 @@ def main():
     run_tlb_char()
     run_data_struct()
     run_constrained_mem()
+    run_frag_mem()
     run_select_thp()
 
 if __name__ == "__main__":
