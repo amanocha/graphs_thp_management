@@ -48,15 +48,15 @@ do
 	
 	cmd="numactl --membind $NUMA_NODE ./utils/fragm fragment $NUMA_NODE $ORDER $frag_level"
 	echo $cmd
-	#screen -dm -S frag $cmd
+	screen -dm -S frag $cmd
 	
 	pid=$(screen -ls | awk '/\.frag\t/ {print strtonum($1)}')
 
 	echo "Waiting for fragmentation to finish..."
-	#while [ ! -f "$FILE" ] 
-	#do
-	#	sleep 1
-	#done
+	while [ ! -f "$FILE" ] 
+	do
+		sleep 1
+	done
 	
 	echo "Done!"
 
@@ -83,7 +83,7 @@ do
 
 	cmd="./utils/free $FILE $ORDER $NUMA_NODE"
 	echo $cmd
-	#$cmd
+	$cmd
 
 	echo ""
 
