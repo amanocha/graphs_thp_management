@@ -103,7 +103,7 @@ We also provide utilities to constrain and fragment memory with kernel memory al
 
 To run these utilities, we modified the Linux kernel source code to support system calls to allocate and free kernel memory. Our changes are available [here](https://github.com/amanocha/graphs_thp_linux).
 
-We provide a program to constrain the amount of memory available to the application. It can be run as follows:
+We provide a program to constrain the amount of memory available to the application. It is a modified version of `memhog` from the `numactl` library and can be run as follows:
 
     numactl --membind [NUMA_NODE] ./numactl/memhog [MEMORY_TO_ALLOCATE_MB]M"
 
