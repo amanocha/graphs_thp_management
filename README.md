@@ -1,3 +1,4 @@
+
 # The Implications of Page Size Management on Graph Analytics
 
 ## Applications
@@ -12,12 +13,28 @@
 
 	Variants of this algorithm are used in ranking algorithms, e.g. of webpages, keywords, etc. 
 
-The source code for these applications are located in `launch/[APP NAME]`.
+The source codes for these applications are located in `launch/[APP NAME]`. These implementations are based on those from the [GraphIt framework](https://graphit-lang.org/).
 
 ## Datasets
-All datasets are available [here](https://decades.cs.princeton.edu/datasets/big/).
+The datasets we use are stored in [Compressed Sparse Row (CSR) Format](https://en.wikipedia.org/wiki/Sparse_matrix) as binary files. Each dataset has the following files:
 
-## Degree-Based Grouping (DBG)
+ - `num_nodes_edges.text` stores the number of vertices and edges in the network, which is used to determine the amount of data to dynamically allocate for the graph application before it is populated with values
+ - `node_array.bin` stores values in the *vertex array*, which are the cumulative number of neighbors each vertex has
+ - `edge_array.bin` stores values in the *edge array*, which are the neighbor IDs for each vertex (this array is indexed by the vertex array) 
+ - `edge_values.bin` stores values in the *values array*, which are edge weights for the path to each vertex's neighbor, if such weights exist
+
+We use the Kronecker network generator from the [GAP Benchmark Suite](http://gap.cs.berkeley.edu/benchmark.html) and the real-world networks are from [SuiteSparse](https://sparse.tamu.edu/) and [SNAP](http://snap.stanford.edu/).
+
+All dataset files are available [here](https://decades.cs.princeton.edu/datasets/big/).
+
+### Degree-Based Grouping (DBG)
+
+We perform dataset preprocessing as a standalone, separate step and store the preprocessed datasets as binary files as well. The code to perform the preprocessing and generate the dataset files is available at `utils/dbg.cpp`. It takes in a dataset folder (storing the 4 files described above) and outputs a file `dbg.txt` storing the preprocessed dataset in edgelist format:
+
+    make
+    ./dbg [PATH_TO_DATASET_FOLDER]
+
+This edgelist file then needs to be converted to a binary file.
 
 For details on the algorithm, see the reference below.
 
