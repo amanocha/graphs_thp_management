@@ -11,12 +11,13 @@
 #include "../../utils/common.h"
 #include "../../utils/split_huge_page.h"
 
-void init_kernel(unsigned long num_nodes, int start_seed, unsigned long *in_index, unsigned long *out_index, unsigned long **in_wl, unsigned long **out_wl, unsigned long *ret) {
+void init_kernel(unsigned long num_nodes, int start_seed, unsigned long *in_index, unsigned long *out_index, unsigned long **in_wl, unsigned long **out_wl, unsigned long **ret) {
+  *ret = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes);
   *in_wl = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes * 5);
   *out_wl = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes * 5);
 
   for (unsigned long i = 0; i < num_nodes; i++) {
-    ret[i] = weight_max;
+    (*ret)[i] = weight_max;
   }
   
   *in_index = 0;
@@ -25,8 +26,8 @@ void init_kernel(unsigned long num_nodes, int start_seed, unsigned long *in_inde
   for (unsigned long i = start_seed; i < start_seed+SEEDS; i++) {
     unsigned long index = *in_index;
     *in_index = index + 1;
-    *in_wl[index] = i;
-    ret[i] = 0;
+    (*in_wl)[index] = i;
+    (*ret)[i] = 0;
   }
 }
 

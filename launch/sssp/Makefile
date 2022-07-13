@@ -1,7 +1,7 @@
 CXX=g++
 CXXFLAGS=-std=c++11 -lnuma
 
-TARGETS= main
+TARGETS= main simple
 
 all: $(TARGETS)
 

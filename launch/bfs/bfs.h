@@ -11,12 +11,13 @@
 #include "../../utils/common.h"
 #include "../../utils/split_huge_page.h"
 
-void init_kernel(int num_nodes, int start_seed, unsigned long *in_index, unsigned long *out_index, unsigned long **in_wl, unsigned long **out_wl, unsigned long *ret) {
+void init_kernel(int num_nodes, int start_seed, unsigned long *in_index, unsigned long *out_index, unsigned long **in_wl, unsigned long **out_wl, unsigned long **ret) {
+  *ret = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes);
   *in_wl = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes * 2);
   *out_wl = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes * 2);
 
   for (unsigned long i = 0; i < num_nodes; i++) {
-    ret[i] = -1;
+    (*ret)[i] = -1;
   }
   
   *in_index = 0;
@@ -25,8 +26,8 @@ void init_kernel(int num_nodes, int start_seed, unsigned long *in_index, unsigne
   for (unsigned long i = start_seed; i < start_seed+SEEDS; i++) {
     unsigned long index = *in_index;
     *in_index = index + 1;
-    *in_wl[index] = i;
-    ret[i] = 0;
+    (*in_wl)[index] = i;
+    (*ret)[i] = 0;
   }
 }
 
@@ -58,30 +59,3 @@ void kernel(csr_graph G, unsigned long *ret, unsigned long *in_wl, unsigned long
       
   }
 }
-
-/*
-int main(int argc, char** argv) {
-
-  string graph_fname;
-  const char *size_filename = "num_nodes_edges.txt";
-  csr_graph G;
-  unsigned long num_nodes;
-  int start_seed = 0;
-
-  assert(argc >= 2);
-  graph_fname = argv[1];
-  if (argc >= 3) start_seed = atoi(argv[2]);
-
-  ifstream nodes_edges_file(graph_fname + size_filename);
-  nodes_edges_file >> num_nodes;
-  
-  unsigned long in_index, out_index, *in_wl, *out_wl, *ret;
-  ret = (unsigned long*) malloc(num_nodes * sizeof(unsigned long));
-  
-  G = parse_bin_files(graph_fname, 0);
-  init_bfs(G, start_seed, &in_index, &out_index, &in_wl, &out_wl, ret);
-  kernel(G, ret, in_wl, &in_index, out_wl, &out_index, 0 , 1);
- 
-  return 0;
-}
-*/

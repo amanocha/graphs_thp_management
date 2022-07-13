@@ -188,7 +188,7 @@ void launch_app(string graph_fname, int run_kernel, unsigned long start_seed) {
   G = parse_bin_files(graph_fname, run_kernel, 1);
 
   create_irreg_data(run_kernel, &ret);
-  init_kernel(num_nodes, start_seed, &in_index, &out_index, &in_wl, &out_wl, ret);
+  init_kernel(num_nodes, start_seed, &in_index, &out_index, &in_wl, &out_wl, &ret);
 
   *node_addr = G.node_array;
   *edge_addr = G.edge_array;
