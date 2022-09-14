@@ -16,7 +16,13 @@
 The source codes for these applications are located in `launch/[APP NAME]`. These implementations are based on those from the [GraphIt framework](https://graphit-lang.org/).
 
 ## Datasets
-The datasets we use are stored in [Compressed Sparse Row (CSR) Format](https://en.wikipedia.org/wiki/Sparse_matrix) as binary files. Each dataset has the following files:
+We used the following datasets and their reordered variants:
+1. **Kronecker_25** - synthetic power-law network
+2. **Twitter** - real social network
+3. **Sd1_Arc** - real web network
+4. **Wikipedia** - real social network
+
+These datasets are stored in [Compressed Sparse Row (CSR) Format](https://en.wikipedia.org/wiki/Sparse_matrix) as binary files. Each dataset has the following files:
 
  - `num_nodes_edges.text` stores the number of vertices and edges in the network, which is used to determine the amount of data to dynamically allocate for the graph application before it is populated with values
  - `node_array.bin` stores values in the *vertex array*, which are the cumulative number of neighbors each vertex has
