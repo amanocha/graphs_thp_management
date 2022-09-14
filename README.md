@@ -176,7 +176,7 @@ To characterize the performance impacts of selective THP usage, run the followin
 
     sudo bash run_frag.sh 5
 
-This command will run a sweep through all applications and datasets (both original and DBG preprocessed) with 4KB base pages only, with Linux THP enabled system-wide, and with THP applied to different percentages (10-100% in increments of 10%) of the property array. For all experiments, there are 3 additional GB available relative to the application's working set size and memory is 50% fragmented. This is to measure the performance benefits of selectively using THP where data is known to be hot, i.e. the top 10-20% of the property array when the dataset is preprocessed, in the presence of memory pressure.
+This command will run a sweep through all applications and datasets (both original and DBG preprocessed) with 4KB base pages only, with Linux THP enabled system-wide, and with THP applied to different percentages (10-100% in increments of 10%) of the property array. For all experiments, there are 3 additional GB available relative to the application's working set size and memory is 50% fragmented. This is to measure the performance benefits of selectively using THP where data is known to be hot, i.e. the top 10-20% of the property array when the dataset is preprocessed, in the presence of memory pressure. The output will be stored in the `results/select_thp/` folder.
 
 ## Results
 
