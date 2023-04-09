@@ -12,7 +12,7 @@
 #include "../../utils/split_huge_page.h"
 
 void init_kernel(unsigned long num_nodes, int start_seed, unsigned long *in_index, unsigned long *out_index, unsigned long **in_wl, unsigned long **out_wl, unsigned long **ret) {
-  *ret = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes);
+  //*ret = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes);
   *in_wl = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes * 5);
   *out_wl = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes * 5);
 
