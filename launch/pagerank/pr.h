@@ -15,7 +15,7 @@ float alpha = 0.85;
 float epsilon = 0.01;
 
 void init_kernel(unsigned long num_nodes, float **x, float **in_r, unsigned long *in_index, unsigned long *out_index, unsigned long **in_wl, unsigned long **out_wl, float **ret) {
-  *ret = (float *) malloc(sizeof(float) * num_nodes);
+  //*ret = (float *) malloc(sizeof(float) * num_nodes);
   *x = (float *) malloc(sizeof(float) * num_nodes);
   *in_r = (float *) malloc(sizeof(float) * num_nodes);
   *in_wl = (unsigned long *) malloc(sizeof(unsigned long) * num_nodes);
